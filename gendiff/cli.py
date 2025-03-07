@@ -1,5 +1,5 @@
 import argparse
-
+import gendiff.gendiff as gendiff
 
 def cli():
     parser = argparse.ArgumentParser(
@@ -15,3 +15,5 @@ def cli():
         help="set format of output"
     )
     arguments = parser.parse_args()
+    raw_file1 = gendiff.read_file(arguments.first_file)
+    raw_file2 = gendiff.read_file(arguments.second_file)
