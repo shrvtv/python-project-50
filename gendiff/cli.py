@@ -15,4 +15,3 @@ def cli():
         help="set format of output"
     )
     arguments = parser.parse_args()
-    print(arguments)
