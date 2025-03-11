@@ -1,5 +1,7 @@
 import argparse
+
 import gendiff.gendiff as gendiff
+
 
 def cli():
     parser = argparse.ArgumentParser(

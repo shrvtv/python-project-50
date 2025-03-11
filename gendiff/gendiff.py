@@ -18,7 +18,9 @@ def generate_diff(file_path1, file_path2):
     file1 = read_file(file_path1)
     file2 = read_file(file_path2)
     keys1 = list(file1.keys())
-    all_keys_sorted = sorted(keys1 + [key for key in file2.keys() if key not in keys1])
+    all_keys_sorted = sorted(
+        keys1 + [key for key in file2.keys() if key not in keys1]
+    )
     diff = ""
     for key in all_keys_sorted:
         value1 = file1.get(key, MISSING)
