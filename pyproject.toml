@@ -11,6 +11,7 @@ gendiff = "gendiff.scripts.gendiff:main"
 
 [dependency-groups]
 dev = [
+    "pytest>=8.3.5",
     "ruff>=0.9.10",
 ]
 
