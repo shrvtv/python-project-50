@@ -1,5 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/shrvtv/python-project-50/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/shrvtv/python-project-50/actions)
+[![Maintainability](https://api.codeclimate.com/v1/badges/979ae755944e881c6f84/maintainability)](https://codeclimate.com/github/shrvtv/python-project-50/maintainability)
 
 ## Showcase
 ### CLI
