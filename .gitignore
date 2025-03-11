@@ -3,3 +3,6 @@
 *.egg-info
 __pycache__
 build/
+.ruff_cache/
+.venv/
+dist/
