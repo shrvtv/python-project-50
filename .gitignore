@@ -6,3 +6,4 @@ build/
 .ruff_cache/
 .venv/
 dist/
+.vscode/
