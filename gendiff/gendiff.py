@@ -24,7 +24,9 @@ def generate_diff(file_path1, file_path2):
     diff = ""
     for key in all_keys_sorted:
         value1 = file1.get(key, MISSING)
+        value1 = str(value1).lower() if isinstance(value1, bool) else value1
         value2 = file2.get(key, MISSING)
+        value2 = str(value2).lower() if isinstance(value2, bool) else value2
         if value1 is not MISSING and value2 is MISSING:
             diff += f"  - {key}: {value1}\n"
         elif value1 is MISSING and value2 is not MISSING:
