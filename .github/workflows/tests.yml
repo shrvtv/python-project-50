@@ -12,5 +12,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
   
-      - name: Run tests
-        run: make test
+      - name: Run tests and publish coverage 
+      - uses: paambaati/codeclimate-action@v9.0.0
+        env:
+          CC_TEST_REPORTER_ID: 8983cf45468691fc9a7c2449a5c1883f02741a3a5f1f8ec9f6d95f46ec19c6d2
+        with:
+          coverageCommand: pytest --cov --cov-report=none
