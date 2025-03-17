@@ -1,31 +1,20 @@
-import json
 from pathlib import Path
 
-import yaml
-
-
-def read_file(filename):
-    path_to_file = Path(filename)
-    match path_to_file.suffix:
-        case ".json":
-            return json.load(open(path_to_file))
-        case ".yml" | ".yaml":
-            return yaml.safe_load(open(path_to_file))
-        case _:
-            raise ValueError("Unsupported file type")
-
+import gendiff.parser
 
 MISSING = object()
 
 
 def generate_diff(file_path1, file_path2):
-    file1 = read_file(file_path1)
-    file2 = read_file(file_path2)
+    file1 = gendiff.parser.read_file(Path(file_path1))
+    file2 = gendiff.parser.read_file(Path(file_path2))
+
     keys1 = list(file1.keys())
     all_keys_sorted = sorted(
         keys1 + [key for key in file2.keys() if key not in keys1]
     )
     diff = ""
+
     for key in all_keys_sorted:
         value1 = file1.get(key, MISSING)
         value1 = str(value1).lower() if isinstance(value1, bool) else value1
