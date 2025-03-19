@@ -14,7 +14,14 @@ def cli():
     parser.add_argument(
         "-f", "--format",
         type=str,
-        help="set format of output"
+        default="stylish",
+        help='set format of output (default: "stylish")'
     )
     arguments = parser.parse_args()
-    print(gendiff.generate_diff(arguments.first_file, arguments.second_file))
+    print(
+        gendiff.generate_diff(
+            arguments.first_file,
+            arguments.second_file,
+            arguments.format
+        )
+    )

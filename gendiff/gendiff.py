@@ -20,7 +20,7 @@ def compare(key, value1, value2):
             )    
 
 
-def generate_diff(file_path1, file_path2):
+def generate_diff(file_path1, file_path2, format_name="stylish"):
     file1 = gendiff.parser.read_file(Path(file_path1))
     file2 = gendiff.parser.read_file(Path(file_path2))
 
