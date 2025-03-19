@@ -11,28 +11,28 @@ COMPARISON = {
 }
 
 
-def compare(key, value1, value2, indentation_level=0):
+def generate_comparison_line(key, value1, value2, indentation_level=0):
     indentation = indentation_level * INDENT
 
-    def make_comparison_line(comparison_result, value):
+    def make_line(comparison_result, value):
         return f"{indentation}{COMPARISON[comparison_result]}{key}: {value}\n"
 
     if value1 is None:
-        return make_comparison_line("added", value2)
+        return make_line("added", value2)
     elif value2 is None:
-        return make_comparison_line("removed", value1)
+        return make_line("removed", value1)
     elif value1 == value2:
-        return make_comparison_line("no change", value1)
+        return make_line("no change", value1)
     else:  # value has changed
         return (
-            make_comparison_line("removed", value1)
-            + make_comparison_line("added", value2)
+            make_line("removed", value1)
+            + make_line("added", value2)
         )
 
 
 def stylish(all_keys_sorted, parsed_file1, parsed_file2):
     comparisons = [
-        compare(
+        generate_comparison_line(
             key,
             parsed_file1.get(key),
             parsed_file2.get(key)
