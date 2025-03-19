@@ -44,4 +44,4 @@ def read_file(path_to_file):
         case ".yml" | ".yaml":
             return yaml.safe_load(process_file_string(file_string))
         case _:
-            raise ValueError("Unsupported file type")
+            raise ValueError("unsupported file type")
