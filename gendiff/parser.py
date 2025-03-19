@@ -7,7 +7,7 @@ QUOTATION_MARKS = ('\"', '\'')
 
 def process_value(value):
     extracted_value = value.strip()
-    if extracted_value[-1] == ',':
+    if extracted_value.endswith(','):
         has_comma = True
         extracted_value = extracted_value[:-1]
     else:
