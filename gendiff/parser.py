@@ -14,8 +14,11 @@ def process_value(value):
         has_comma = False
 
     if not (
-        extracted_value.startswith(QUOTATION_MARKS)
-        and extracted_value.endswith(QUOTATION_MARKS)
+        extracted_value in "{}"
+        or (
+                extracted_value.startswith(QUOTATION_MARKS)
+                and extracted_value.endswith(QUOTATION_MARKS)
+        )
     ):
         extracted_value = f'"{extracted_value}"'
     return (extracted_value + ',') if has_comma else extracted_value
