@@ -7,11 +7,15 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/979ae755944e881c6f84/test_coverage)](https://codeclimate.com/github/shrvtv/python-project-50/test_coverage)
 
 ## Showcase
-#### CLI (JSON)
+Hint: (file structure, file type)
+#### CLI (flat, JSON)
 [![asciicast](https://asciinema.org/a/rvFHY8aKB9RnLtzdb3cISCoI7.svg)](https://asciinema.org/a/rvFHY8aKB9RnLtzdb3cISCoI7)
 
-#### CLI (YAML)
+#### CLI (flat, YAML)
 [![asciicast](https://asciinema.org/a/Zgr11cjavSp6Whk2yj6R307ea.svg)](https://asciinema.org/a/Zgr11cjavSp6Whk2yj6R307ea)
+
+#### CLI (nested, agnostic)
+[![asciicast](https://asciinema.org/a/GUbGzR4Olw4rhPIMPHdQHG3xH.svg)](https://asciinema.org/a/GUbGzR4Olw4rhPIMPHdQHG3xH)
 
 #### Library
 [![asciicast](https://asciinema.org/a/q1nl2NxmdjA7iij8KWm0NIf0A.svg)](https://asciinema.org/a/q1nl2NxmdjA7iij8KWm0NIf0A)
