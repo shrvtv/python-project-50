@@ -1,4 +1,6 @@
 import argparse
+import os
+import json
 
 
 def main():
@@ -12,8 +14,14 @@ def main():
     parser.add_argument("first_file")
     parser.add_argument("second_file")
 
-    parser.parse_args()
+    args = parser.parse_args()
 
+    current_location = os.getcwd()
+    first_path = os.path.join(current_location, args.first_file)
+    second_path = os.path.join(current_location, args.second_file)
+
+    first_parsed = json.load(open(first_path))
+    second_parsed = json.load(open(second_path))
 
 if __name__ == "__main__":
     main()
