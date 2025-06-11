@@ -23,5 +23,8 @@ def main():
     first_parsed = json.load(open(first_path))
     second_parsed = json.load(open(second_path))
 
+    result = {}
+    return result
+
 if __name__ == "__main__":
     main()
