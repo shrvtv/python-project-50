@@ -48,11 +48,12 @@ def main():
     first_path = os.path.join(current_location, args.first_file)
     second_path = os.path.join(current_location, args.second_file)
 
-    first_parsed = json.load(open(first_path))
-    second_parsed = json.load(open(second_path))
+    first_file = json.load(open(first_path))
+    second_file = json.load(open(second_path))
 
-    result = {}
-    return result
+    diff = generate_diff(first_file, second_file)
+    print(diff)
+
 
 if __name__ == "__main__":
     main()
