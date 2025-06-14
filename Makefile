@@ -6,5 +6,5 @@ test:
 
 check: lint test
 
-test-coverage-xml:
+test-and-coverage-xml:
 	uv run pytest --cov --cov-report=xml

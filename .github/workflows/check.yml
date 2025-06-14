@@ -10,7 +10,7 @@ jobs:
       - name: Install Ruff and run 'ruff check'
         uses: astral-sh/ruff-action@v3 # runs 'ruff check' by default
 
-  test:
+  test-and-coverage:
     runs-on: ubuntu-latest
     steps:
       - name: Clone the repository
@@ -25,5 +25,5 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run Pytest
-        run: uv run pytest
+      - name: Run Pytest and generate coverage.xml
+        run: make test-and-coverage-xml
