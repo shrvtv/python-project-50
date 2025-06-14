@@ -8,8 +8,18 @@ CHANGE_SYNTAX = {
     'unchanged': '    '
 }
 
+def parse(filename):
+    current_location = os.getcwd()
+    path = os.path.join(current_location, filename)
+    if filename.endswith('.json'):
+        return json.load(open(path))
+    else:
+        raise ValueError('Not a JSON file.')
 
-def generate_diff(first, second):
+
+def generate_diff(file1, file2):
+    first = parse(file1)
+    second = parse(file2)
     first_keys = set(first.keys())
     second_keys = set(second.keys())
     all_keys = sorted(first_keys.union(second_keys))
@@ -47,15 +57,7 @@ def main():
 
     args = parser.parse_args()
 
-    current_location = os.getcwd()
-    first_path = os.path.join(current_location, args.first_file)
-    second_path = os.path.join(current_location, args.second_file)
-
-    first_file = json.load(open(first_path))
-    second_file = json.load(open(second_path))
-
-    diff = generate_diff(first_file, second_file)
-    print(diff)
+    print(generate_diff(args.first_file, args.second_file))
 
 
 if __name__ == "__main__":
