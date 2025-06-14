@@ -27,3 +27,13 @@ jobs:
 
       - name: Run Pytest and generate coverage.xml
         run: make test-and-coverage-xml
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=shrvtv
+            -Dsonar.projectKey=shrvtv_python-project-50
+            -Dsonar.python.coverage.reportPaths=coverage.xml
