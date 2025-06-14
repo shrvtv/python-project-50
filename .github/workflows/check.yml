@@ -5,5 +5,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
-      - run: ruff check
+      - uses: astral-sh/ruff-action@v3 # runs ruff check by default
