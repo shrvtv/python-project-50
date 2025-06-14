@@ -3,3 +3,5 @@ lint:
 
 test:
 	uv run pytest
+
+check: lint test
