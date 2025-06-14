@@ -8,6 +8,7 @@ CHANGE_SYNTAX = {
     'unchanged': '    '
 }
 
+
 def parse(filename):
     current_location = os.getcwd()
     path = os.path.join(current_location, filename)
