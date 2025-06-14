@@ -26,6 +26,14 @@ def generate_diff(file1, file2):
     comparison = []
     for key in all_keys:
         first_value, second_value = first.get(key), second.get(key)
+
+        # Output mimics JSON for bools
+        # True | TRUE -> true
+        if isinstance(first_value, bool):
+            first_value = str(first_value).lower()
+        if isinstance(second_value, bool):
+            second_value = str(second_value).lower()
+
         if key not in first_keys and key in second_keys:
             comparison.append((CHANGE_SYNTAX['added'], key, second_value))
         elif key in first_keys and key not in second_keys:
