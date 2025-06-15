@@ -7,7 +7,8 @@ import yaml
 CHANGE_SYNTAX = {
     'added': '  + ',
     'removed': '  - ',
-    'unchanged': '    '
+    'unchanged': '    ',
+    'changed': None
 }
 
 
@@ -22,39 +23,65 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
+def make_line(change_type, key, value, level=0):
+    return f"{level * '    '}{change_type}{key}: {value}"
+
+
+def mimic_json(text):
+    text = text.replace('True', 'true')
+    text = text.replace('False', 'false')
+    text = text.replace('None', 'null')
+    return text
+
+
 def generate_diff(file1, file2):
     first = parse(file1)
     second = parse(file2)
+    comparison = {}
     first_keys = set(first.keys())
     second_keys = set(second.keys())
-    all_keys = sorted(first_keys.union(second_keys))
-    comparison = []
-    for key in all_keys:
+    for key in first_keys.union(second_keys):
         first_value, second_value = first.get(key), second.get(key)
 
-        # Output mimics JSON for bools
-        # True | TRUE -> true
-        if isinstance(first_value, bool):
-            first_value = str(first_value).lower()
-        if isinstance(second_value, bool):
-            second_value = str(second_value).lower()
-
         if key not in first_keys and key in second_keys:
-            comparison.append((CHANGE_SYNTAX['added'], key, second_value))
+            change_type = CHANGE_SYNTAX['added']
+            value = second_value
         elif key in first_keys and key not in second_keys:
-            comparison.append((CHANGE_SYNTAX['removed'], key, first_value))
+            change_type = CHANGE_SYNTAX['removed']
+            value = first_value
         else:  # key is present in both files
-            if first_value != second_value:
-                comparison.append(
-                    (CHANGE_SYNTAX['removed'], key, first_value)
-                )
-                comparison.append((CHANGE_SYNTAX['added'], key, second_value))
+            if first_value == second_value:
+                change_type = CHANGE_SYNTAX['unchanged']
+                value = first_value
             else:
-                comparison.append(
-                    (CHANGE_SYNTAX['unchanged'], key, first_value)
+                change_type = CHANGE_SYNTAX['changed']
+                value = {
+                    'old': first_value,
+                    'new': second_value
+                }
+        comparison[key] = {
+            'change_type': change_type,
+            'value': value
+        }
+
+    lines = []
+    for key in sorted(comparison.keys()):
+        element = comparison[key]
+        if not element['change_type'] == CHANGE_SYNTAX['changed']:
+            lines.append(
+                make_line(element['change_type'], key, element['value'])
+            )
+        else:
+            lines.extend([
+                make_line(
+                    CHANGE_SYNTAX['removed'], key, element['value']['old']
+                ),
+                make_line(
+                    CHANGE_SYNTAX['added'], key, element['value']['new']
                 )
-    lines = [f"{prefix}{key}: {value}" for prefix, key, value in comparison]
-    return '\n'.join(('{', *lines, '}'))
+            ])
+
+    return mimic_json('\n'.join(('{', *lines, '}')))
 
 
 def main():
