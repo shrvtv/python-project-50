@@ -1,6 +1,9 @@
 import argparse
+import pyyaml
 import json
 import os
+
+import yaml
 
 CHANGE_SYNTAX = {
     'added': '  + ',
@@ -14,8 +17,10 @@ def parse(filename):
     path = os.path.join(current_location, filename)
     if filename.endswith('.json'):
         return json.load(open(path))
+    elif filename.endswith('.yaml') or filename.endswith('.yml'):
+        return yaml.load(open(path))
     else:
-        raise ValueError('Not a JSON file.')
+        raise ValueError('Invalid file type')
 
 
 def generate_diff(file1, file2):
