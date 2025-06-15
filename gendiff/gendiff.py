@@ -1,5 +1,5 @@
 import argparse
-import pyyaml
+import yaml
 import json
 import os
 
@@ -18,7 +18,7 @@ def parse(filename):
     if filename.endswith('.json'):
         return json.load(open(path))
     elif filename.endswith('.yaml') or filename.endswith('.yml'):
-        return yaml.load(open(path))
+        return yaml.safe_load(open(path))
     else:
         raise ValueError('Invalid file type')
 
