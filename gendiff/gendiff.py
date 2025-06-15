@@ -1,5 +1,4 @@
 import argparse
-import yaml
 import json
 import os
 
