@@ -4,56 +4,49 @@ import os
 
 import yaml
 
-EXCEPTIONS = (True, False)
+import gendiff.utilities as utils
+
+SINGLETONS = (True, False, None)
 
 CHANGE_SYNTAX = {
     'added': '  + ',
     'removed': '  - ',
-    'unchanged': '    ',
-    'changed': None
+    'unchanged': '    '
 }
+
+missing = object()
 
 
 def parse(filename):
     current_location = os.getcwd()
     path = os.path.join(current_location, filename)
+    file = open(path)
     if filename.endswith('.json'):
-        return json.load(open(path))
+        return json.load(file)
     elif filename.endswith('.yaml') or filename.endswith('.yml'):
-        return yaml.safe_load(open(path))
+        return yaml.safe_load(file)
     else:
         raise ValueError('Invalid file type')
 
 
-def make_line(change_type, key, value, level=0):
-    return f"{level * '    '}{change_type}{key}: {value}"
-
-
-def mimic_json(text):
-    text = text.replace('True', 'true')
-    text = text.replace('False', 'false')
-    text = text.replace('None', 'null')
-    return text
-
-
 def compare(first, second):
-    if first in EXCEPTIONS:
-        first = str(first)
-    if second in EXCEPTIONS:
-        second = str(second)
+    if first in SINGLETONS:
+        first = utils.protect_singleton(first)
+    if second in SINGLETONS:
+        second = utils.protect_singleton(second)
 
-    if second and not first:
-        change_type = CHANGE_SYNTAX['added']
+    if first is missing and second:
+        change_type = 'added'
         value = second
-    elif first and not second:
-        change_type = CHANGE_SYNTAX['removed']
+    elif second is missing and first:
+        change_type = 'removed'
         value = first
     else:  # key is present in both files
         if first == second:
-            change_type = CHANGE_SYNTAX['unchanged']
+            change_type = 'unchanged'
             value = first
         else:
-            change_type = CHANGE_SYNTAX['changed']
+            change_type = 'changed'
             value = {
                 'old': first,
                 'new': second
@@ -71,27 +64,25 @@ def generate_diff(file1, file2):
     first_keys = set(first.keys())
     second_keys = set(second.keys())
     for key in first_keys.union(second_keys):
-        first_value, second_value = first.get(key), second.get(key)
+        first_value = first.get(key, missing)
+        second_value = second.get(key, missing)
         comparison[key] = compare(first_value, second_value)
 
     lines = []
     for key in sorted(comparison.keys()):
         element = comparison[key]
-        if not element['change_type'] == CHANGE_SYNTAX['changed']:
-            lines.append(
-                make_line(element['change_type'], key, element['value'])
-            )
-        else:
+        change_type, value = element['change_type'], element['value']
+        if change_type == 'changed':
             lines.extend([
-                make_line(
-                    CHANGE_SYNTAX['removed'], key, element['value']['old']
-                ),
-                make_line(
-                    CHANGE_SYNTAX['added'], key, element['value']['new']
-                )
+                utils.make_line(CHANGE_SYNTAX['removed'], key, value['old']),
+                utils.make_line(CHANGE_SYNTAX['added'], key, value['new'])
             ])
+        else:
+            lines.append(
+                utils.make_line(CHANGE_SYNTAX[change_type], key, value)
+            )
 
-    return mimic_json('\n'.join(('{', *lines, '}')))
+    return '\n'.join(('{', *lines, '}'))
 
 
 def main():
