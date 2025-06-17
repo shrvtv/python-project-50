@@ -28,6 +28,16 @@ def parse(filename):
 
 
 def compare(first, second):
+    if isinstance(first, dict) and isinstance(second, dict):
+        comparison = {}
+        first_keys = set(first.keys())
+        second_keys = set(second.keys())
+        for key in first_keys.union(second_keys):
+            first_value = first.get(key, missing)
+            second_value = second.get(key, missing)
+            comparison[key] = compare(first_value, second_value)
+        return comparison
+
     first = utils.protect_value(value=first, exception=missing)
     second = utils.protect_value(value=second, exception=missing)
     if first is missing and second:
@@ -41,7 +51,7 @@ def compare(first, second):
             change_type = 'unchanged'
             value = first
         else:
-            change_type = 'changed'
+            change_type = 'modified'
             value = {
                 'old': first,
                 'new': second
@@ -55,19 +65,12 @@ def compare(first, second):
 def generate_diff(file1, file2):
     first = parse(file1)
     second = parse(file2)
-    comparison = {}
-    first_keys = set(first.keys())
-    second_keys = set(second.keys())
-    for key in first_keys.union(second_keys):
-        first_value = first.get(key, missing)
-        second_value = second.get(key, missing)
-        comparison[key] = compare(first_value, second_value)
-
+    comparison = compare(first, second)
     lines = []
     for key in sorted(comparison.keys()):
         element = comparison[key]
         change_type, value = element['change_type'], element['value']
-        if change_type == 'changed':
+        if change_type == 'modified':  # in this case a dict is returned
             lines.extend([
                 utils.make_line(CHANGE_SYNTAX['removed'], key, value['old']),
                 utils.make_line(CHANGE_SYNTAX['added'], key, value['new'])
