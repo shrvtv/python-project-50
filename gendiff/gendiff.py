@@ -6,8 +6,6 @@ import yaml
 
 import gendiff.utilities as utils
 
-SINGLETONS = (True, False, None)
-
 CHANGE_SYNTAX = {
     'added': '  + ',
     'removed': '  - ',
@@ -30,11 +28,8 @@ def parse(filename):
 
 
 def compare(first, second):
-    if first in SINGLETONS:
-        first = utils.protect_singleton(first)
-    if second in SINGLETONS:
-        second = utils.protect_singleton(second)
-
+    first = utils.protect_value(value=first, exception=missing)
+    second = utils.protect_value(value=second, exception=missing)
     if first is missing and second:
         change_type = 'added'
         value = second
@@ -82,7 +77,7 @@ def generate_diff(file1, file2):
                 utils.make_line(CHANGE_SYNTAX[change_type], key, value)
             )
 
-    return '\n'.join(('{', *lines, '}'))
+    return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
 def main():
