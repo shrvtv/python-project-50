@@ -29,6 +29,7 @@ def parse(filename):
 
 def compare(first, second, location=''):
     if isinstance(first, dict) and isinstance(second, dict):
+        change = 'unchanged' if first == second else 'modified'
         comparison = {}
         first_keys = set(first.keys())
         second_keys = set(second.keys())
@@ -40,30 +41,36 @@ def compare(first, second, location=''):
                 second_value,
                 utils.make_location(location, key)
             )
-        return comparison
+        return {
+            'type': 'node',
+            'path': location,
+            'change': change,
+            'value': comparison
+        }
 
     first = utils.protect_value(value=first, exception=missing)
     second = utils.protect_value(value=second, exception=missing)
     if first is missing and second:
-        change_type = 'added'
+        change = 'added'
         value = second
     elif second is missing and first:
-        change_type = 'removed'
+        change = 'removed'
         value = first
     else:  # key is present in both files
         if first == second:
-            change_type = 'unchanged'
+            change = 'unchanged'
             value = first
         else:
-            change_type = 'modified'
+            change = 'modified'
             value = {
                 'old': first,
                 'new': second
             }
     return {
-        'change_type': change_type,
-        'value': value,
-        'location': location
+        'type': 'leaf',
+        'path': location,
+        'change': change,
+        'value': value
     }
 
 
@@ -72,18 +79,28 @@ def generate_diff(file1, file2):
     second = parse(file2)
     comparison = compare(first, second)
     lines = []
-    for key in sorted(comparison.keys()):
-        element = comparison[key]
-        change_type, value = element['change_type'], element['value']
-        if change_type == 'modified':  # in this case a dict is returned
-            lines.extend([
-                utils.make_line(CHANGE_SYNTAX['removed'], key, value['old']),
-                utils.make_line(CHANGE_SYNTAX['added'], key, value['new'])
-            ])
+    for key in sorted(comparison['value'].keys()):
+        element = comparison['value'][key]
+        level = element['path'].count('.')
+        change_type, value = element['change'], element['value']
+        if element['type'] == 'node':
+            pass
         else:
-            lines.append(
-                utils.make_line(CHANGE_SYNTAX[change_type], key, value)
-            )
+            if change_type == 'modified':  # in this case a dict is returned
+                lines.extend([
+                    utils.make_line(
+                        CHANGE_SYNTAX['removed'], key, value['old'], level
+                    ),
+                    utils.make_line(
+                        CHANGE_SYNTAX['added'], key, value['new'], level
+                    )
+                ])
+            else:
+                lines.append(
+                    utils.make_line(
+                        CHANGE_SYNTAX[change_type], key, value, level
+                    )
+                )
 
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
