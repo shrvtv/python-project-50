@@ -27,7 +27,7 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def compare(first, second):
+def compare(first, second, location=''):
     if isinstance(first, dict) and isinstance(second, dict):
         comparison = {}
         first_keys = set(first.keys())
@@ -35,7 +35,11 @@ def compare(first, second):
         for key in first_keys.union(second_keys):
             first_value = first.get(key, missing)
             second_value = second.get(key, missing)
-            comparison[key] = compare(first_value, second_value)
+            comparison[key] = compare(
+                first_value,
+                second_value,
+                utils.make_location(location, key)
+            )
         return comparison
 
     first = utils.protect_value(value=first, exception=missing)
@@ -58,7 +62,8 @@ def compare(first, second):
             }
     return {
         'change_type': change_type,
-        'value': value
+        'value': value,
+        'location': location
     }
 
 

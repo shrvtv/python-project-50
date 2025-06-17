@@ -11,3 +11,7 @@ def mimic_json(text):
     text = text.replace('False', 'false')
     text = text.replace('None', 'null')
     return text
+
+
+def make_location(location, key):
+    return location + ('.' if location else '') + key
