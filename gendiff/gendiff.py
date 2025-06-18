@@ -74,13 +74,10 @@ def compare(first, second, location=''):
     }
 
 
-def generate_diff(file1, file2):
-    first = parse(file1)
-    second = parse(file2)
-    comparison = compare(first, second)
+def render_tree(tree):
     lines = []
-    for key in sorted(comparison['value'].keys()):
-        element = comparison['value'][key]
+    for key in sorted(tree['value'].keys()):
+        element = tree['value'][key]
         level = element['path'].count('.')
         change_type, value = element['change'], element['value']
         if element['type'] == 'node':
@@ -103,6 +100,13 @@ def generate_diff(file1, file2):
                 )
 
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
+
+
+def generate_diff(file1, file2):
+    first = parse(file1)
+    second = parse(file2)
+    comparison = compare(first, second)
+    return render_tree(comparison)
 
 
 def main():
