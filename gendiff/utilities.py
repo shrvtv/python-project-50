@@ -1,9 +1,16 @@
+import copy
+
+
 def make_line(change_type, key, value, level=0):
     return f"{level * '    '}{change_type}{key}: {value}"
 
 
 def protect_value(value, exception):
-    return str(value) if value != exception else exception
+    if value is exception:
+        return exception
+    if isinstance(value, dict):
+        return copy.deepcopy(value)
+    return str(value)
 
 
 def mimic_json(text):
@@ -13,15 +20,14 @@ def mimic_json(text):
     return text
 
 
-def make_location(location, key):
-    return location + ('.' if location else '') + key
+def make_path(path, key):
+    return path + ('.' if path else '') + key
 
 
-def make_element(change, key, value, location):
-    path = make_location(location, key)
+def make_element(element_type, change, value, location):
     return {
-            'type': 'leaf',
-            'path': path,
+            'type': element_type,
+            'path': location,
             'change': change,
             'value': value
-        }
+    }

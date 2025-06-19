@@ -27,46 +27,45 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def compare(first, second, key='', location=''):
+def compare(first, second, key='', path=''):
+    new_path = utils.make_path(path, key)
+    first = utils.protect_value(value=first, exception=missing)
+    second = utils.protect_value(value=second, exception=missing)
+
     if isinstance(first, dict) and isinstance(second, dict):
+        element_type = 'node'
         change = 'unchanged' if first == second else 'modified'
-        comparison = {}
+        value = {}
         first_keys = set(first.keys())
         second_keys = set(second.keys())
         for key in first_keys.union(second_keys):
             first_value = first.get(key, missing)
             second_value = second.get(key, missing)
-            comparison[key] = compare(
+            value[key] = compare(
                 first_value,
                 second_value,
-                utils.make_location(location, key)
+                new_path
             )
-        return {
-            'type': 'node',
-            'path': location,
-            'change': change,
-            'value': comparison
-        }
+    else:
+        element_type = 'leaf'
 
-    first = utils.protect_value(value=first, exception=missing)
-    second = utils.protect_value(value=second, exception=missing)
-    if first is missing and second:
-        change = 'added'
-        value = second
-    elif second is missing and first:
-        change = 'removed'
-        value = first
-    else:  # key is present in both files
-        if first == second:
-            change = 'unchanged'
+        if first is missing and second:
+            change = 'added'
+            value = second
+        elif second is missing and first:
+            change = 'removed'
             value = first
-        else:
-            change = 'modified'
-            value = {
-                'old': first,
-                'new': second
-            }
-    return utils.make_element(change, key, value, location)
+        else:  # key is present in both files
+            if first == second:
+                change = 'unchanged'
+                value = first
+            else:
+                change = 'modified'
+                value = {
+                    'old': first,
+                    'new': second
+                }
+    return utils.make_element(element_type, change, value, new_path)
 
 
 def render_tree(tree):
