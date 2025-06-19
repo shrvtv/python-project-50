@@ -27,13 +27,11 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def compare(first, second, key='', path=''):
-    new_path = utils.make_path(path, key)
+def compare(first, second):
     first = utils.protect_value(value=first, exception=missing)
     second = utils.protect_value(value=second, exception=missing)
 
     if isinstance(first, dict) and isinstance(second, dict):
-        element_type = 'node'
         change = 'unchanged' if first == second else 'modified'
         value = {}
         first_keys = set(first.keys())
@@ -43,12 +41,9 @@ def compare(first, second, key='', path=''):
             second_value = second.get(key, missing)
             value[key] = compare(
                 first_value,
-                second_value,
-                new_path
+                second_value
             )
     else:
-        element_type = 'leaf'
-
         if first is missing and second:
             change = 'added'
             value = second
@@ -65,33 +60,32 @@ def compare(first, second, key='', path=''):
                     'old': first,
                     'new': second
                 }
-    return utils.make_element(element_type, change, value, new_path)
+    return {
+        'change': change,
+        'value': value
+    }
 
 
-def render_tree(tree):
+def render_tree(tree, level=0):
     lines = []
     for key in sorted(tree['value'].keys()):
         element = tree['value'][key]
-        level = element['path'].count('.')
         change_type, value = element['change'], element['value']
-        if element['type'] == 'node':
-            pass
-        else:
-            if change_type == 'modified':  # in this case a dict is returned
-                lines.extend([
-                    utils.make_line(
-                        CHANGE_SYNTAX['removed'], key, value['old'], level
-                    ),
-                    utils.make_line(
-                        CHANGE_SYNTAX['added'], key, value['new'], level
-                    )
-                ])
-            else:
-                lines.append(
-                    utils.make_line(
-                        CHANGE_SYNTAX[change_type], key, value, level
-                    )
+        if change_type == 'modified':  # in this case a dict is returned
+            lines.extend([
+                utils.make_line(
+                    CHANGE_SYNTAX['removed'], key, value['old'], level
+                ),
+                utils.make_line(
+                    CHANGE_SYNTAX['added'], key, value['new'], level
                 )
+            ])
+        else:
+            lines.append(
+                utils.make_line(
+                    CHANGE_SYNTAX[change_type], key, value, level
+                )
+            )
 
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 

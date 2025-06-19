@@ -22,12 +22,3 @@ def mimic_json(text):
 
 def make_path(path, key):
     return path + ('.' if path else '') + key
-
-
-def make_element(element_type, change, value, location):
-    return {
-            'type': element_type,
-            'path': location,
-            'change': change,
-            'value': value
-    }
