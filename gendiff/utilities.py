@@ -1,6 +1,5 @@
 import copy
 
-
 CHANGE_SYNTAX = {
     'added': '  + ',
     'removed': '  - ',
