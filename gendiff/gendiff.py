@@ -6,12 +6,6 @@ import yaml
 
 import gendiff.utilities as utils
 
-CHANGE_SYNTAX = {
-    'added': '  + ',
-    'removed': '  - ',
-    'unchanged': '    '
-}
-
 missing = object()
 
 
@@ -27,74 +21,46 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def compare(first, second):
-    first = utils.protect_value(value=first, exception=missing)
-    second = utils.protect_value(value=second, exception=missing)
+def compare(old, new):
+    old = utils.protect_value(old, exception=missing)
+    new = utils.protect_value(new, exception=missing)
 
-    if isinstance(first, dict) and isinstance(second, dict):
-        change = 'unchanged' if first == second else 'modified'
-        value = {}
-        first_keys = set(first.keys())
-        second_keys = set(second.keys())
-        for key in first_keys.union(second_keys):
-            first_value = first.get(key, missing)
-            second_value = second.get(key, missing)
-            value[key] = compare(
-                first_value,
-                second_value
-            )
+    if old == new:
+        return {
+            'change': 'unchanged',
+            'value': old
+        }
+    elif old is missing and new:
+        return {
+            'change': 'added',
+            'value': new
+        }
+    elif new is missing and old:
+        return {
+            'change': 'removed',
+            'value': old
+        }
     else:
-        if first is missing and second:
-            change = 'added'
-            value = second
-        elif second is missing and first:
-            change = 'removed'
-            value = first
-        else:  # key is present in both files
-            if first == second:
-                change = 'unchanged'
-                value = first
-            else:
-                change = 'modified'
-                value = {
-                    'old': first,
-                    'new': second
-                }
-    return {
-        'change': change,
-        'value': value
-    }
-
-
-def render_tree(tree, level=0):
-    lines = []
-    for key in sorted(tree['value'].keys()):
-        element = tree['value'][key]
-        change_type, value = element['change'], element['value']
-        if change_type == 'modified':  # in this case a dict is returned
-            lines.extend([
-                utils.make_line(
-                    CHANGE_SYNTAX['removed'], key, value['old'], level
-                ),
-                utils.make_line(
-                    CHANGE_SYNTAX['added'], key, value['new'], level
-                )
-            ])
-        else:
-            lines.append(
-                utils.make_line(
-                    CHANGE_SYNTAX[change_type], key, value, level
-                )
-            )
-
-    return utils.mimic_json('\n'.join(('{', *lines, '}')))
+        return {
+            'change': 'modified',
+            'value': (old, new)
+        }
 
 
 def generate_diff(file1, file2):
     first = parse(file1)
     second = parse(file2)
-    comparison = compare(first, second)
-    return render_tree(comparison)
+    lines = []
+    all_keys = set(first.keys()).union(set(second.keys()))
+    for key in sorted(all_keys):
+        comparison = compare(first.get(key, missing), second.get(key, missing))
+        change, value = comparison['change'], comparison['value']
+        if comparison['change'] != 'modified':
+            lines.append(utils.make_line(change, key, value))
+        else:
+            lines.append(utils.make_line('removed', key, value[0]))
+            lines.append(utils.make_line('added', key, value[1]))
+    return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
 def main():

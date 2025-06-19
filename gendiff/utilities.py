@@ -1,8 +1,15 @@
 import copy
 
 
+CHANGE_SYNTAX = {
+    'added': '  + ',
+    'removed': '  - ',
+    'unchanged': '    '
+}
+
+
 def make_line(change_type, key, value, level=0):
-    return f"{level * '    '}{change_type}{key}: {value}"
+    return f"{level * '    '}{CHANGE_SYNTAX[change_type]}{key}: {value}"
 
 
 def protect_value(value, exception):
