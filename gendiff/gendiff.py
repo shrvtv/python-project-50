@@ -27,7 +27,7 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def compare(first, second, location=''):
+def compare(first, second, key='', location=''):
     if isinstance(first, dict) and isinstance(second, dict):
         change = 'unchanged' if first == second else 'modified'
         comparison = {}
@@ -66,12 +66,7 @@ def compare(first, second, location=''):
                 'old': first,
                 'new': second
             }
-    return {
-        'type': 'leaf',
-        'path': location,
-        'change': change,
-        'value': value
-    }
+    return utils.make_element(change, key, value, location)
 
 
 def render_tree(tree):

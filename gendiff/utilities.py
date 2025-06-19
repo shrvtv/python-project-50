@@ -15,3 +15,13 @@ def mimic_json(text):
 
 def make_location(location, key):
     return location + ('.' if location else '') + key
+
+
+def make_element(change, key, value, location):
+    path = make_location(location, key)
+    return {
+            'type': 'leaf',
+            'path': path,
+            'change': change,
+            'value': value
+        }
