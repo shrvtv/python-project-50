@@ -21,30 +21,32 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
+def add_change(value, change):
+    if isinstance(value, dict):
+        if change == 'modified':
+            raise ValueError('Modified elements are processed by compare().')
+        new_value = {}
+        for key in value.keys():
+            new_value[key] = add_change(value[key], 'unchanged')
+        value = new_value
+    return {
+        'change': change,
+        'value': value
+    }
+
+
 def compare(old, new):
     old = utils.protect_value(old, exception=missing)
     new = utils.protect_value(new, exception=missing)
 
     if old == new:
-        return {
-            'change': 'unchanged',
-            'value': old
-        }
+        return add_change(old, 'unchanged')
     elif old is missing and new:
-        return {
-            'change': 'added',
-            'value': new
-        }
+        return add_change(new, 'added')
     elif new is missing and old:
-        return {
-            'change': 'removed',
-            'value': old
-        }
+        return add_change(old, 'removed')
     else:
-        return {
-            'change': 'modified',
-            'value': (old, new)
-        }
+        return add_change((old, new), 'modified')
 
 
 def generate_diff(file1, file2):
