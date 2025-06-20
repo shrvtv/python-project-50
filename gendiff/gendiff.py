@@ -67,10 +67,10 @@ def compare(old, new, root=True):
 
 
 def render(element, key=None, level=0):
-    lines = []
     change = element['change']
     value = element['value']
     if isinstance(value, tuple):
+        lines = []
         for e in value:
             lines.append(render(e, key))
         return lines
