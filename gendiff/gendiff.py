@@ -85,7 +85,9 @@ def generate_diff(file1, file2):
     lines = []
     for k in sorted(comparison.keys()):
         rendered = render(comparison[k], k)
-        lines.extend(rendered) if isinstance(rendered, list) else lines.append(rendered)
+        (lines.extend(rendered)
+         if isinstance(rendered, list)
+         else lines.append(rendered))
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
