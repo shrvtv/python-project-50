@@ -29,13 +29,17 @@ def add_change(value, change):
         for key in value.keys():
             new_value[key] = add_change(value[key], 'unchanged')
         value = new_value
+    elif isinstance(value, tuple):  # The value is modified
+        first = add_change(value[0], 'removed')
+        second = add_change(value[1], 'added')
+        value = (first, second)
     return {
         'change': change,
         'value': value
     }
 
 
-def compare(old, new):
+def compare(old, new, root=True):
     old = utils.protect_value(old, exception=missing)
     new = utils.protect_value(new, exception=missing)
 
@@ -46,22 +50,42 @@ def compare(old, new):
     elif new is missing and old:
         return add_change(old, 'removed')
     else:
+        if isinstance(old, dict) and isinstance(new, dict):
+            all_keys = set(old.keys()).union(set(new.keys()))
+            result = {}
+            for key in all_keys:
+                result[key] = compare(
+                    old.get(key, missing),
+                    new.get(key, missing),
+                    root=False
+                )
+            return result if root else {
+                'change': 'modified',
+                'value': result
+            }
         return add_change((old, new), 'modified')
+
+
+def render(element, key=None, level=0):
+    lines = []
+    change = element['change']
+    value = element['value']
+    if isinstance(value, tuple):
+        for e in value:
+            lines.append(render(e, key))
+        return lines
+    else:
+        return f"{level * '    '}{utils.CHANGE_SYNTAX[change]}{key}: {value}"
 
 
 def generate_diff(file1, file2):
     first = parse(file1)
     second = parse(file2)
+    comparison = compare(first, second)
     lines = []
-    all_keys = set(first.keys()).union(set(second.keys()))
-    for key in sorted(all_keys):
-        comparison = compare(first.get(key, missing), second.get(key, missing))
-        change, value = comparison['change'], comparison['value']
-        if comparison['change'] != 'modified':
-            lines.append(utils.make_line(change, key, value))
-        else:
-            lines.append(utils.make_line('removed', key, value[0]))
-            lines.append(utils.make_line('added', key, value[1]))
+    for k in sorted(comparison.keys()):
+        rendered = render(comparison[k], k)
+        lines.extend(rendered) if isinstance(rendered, list) else lines.append(rendered)
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
