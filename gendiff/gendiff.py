@@ -70,12 +70,10 @@ def render(element, key=None, level=0):
     change = element['change']
     value = element['value']
     if isinstance(value, tuple):
-        lines = []
-        for e in value:
-            lines.append(render(e, key))
-        return lines
+        removed, added = value
+        return render(removed, key) + render(added, key)  # both are lists
     else:
-        return f"{level * '    '}{utils.CHANGE_SYNTAX[change]}{key}: {value}"
+        return [f"{level * '    '}{utils.CHANGE_SYNTAX[change]}{key}: {value}"]
 
 
 def generate_diff(file1, file2):
@@ -84,10 +82,7 @@ def generate_diff(file1, file2):
     comparison = compare(first, second)
     lines = []
     for k in sorted(comparison.keys()):
-        rendered = render(comparison[k], k)
-        (lines.extend(rendered)
-         if isinstance(rendered, list)
-         else lines.append(rendered))
+        lines.extend(render(comparison[k], k))
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
