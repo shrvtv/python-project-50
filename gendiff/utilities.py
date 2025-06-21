@@ -1,5 +1,3 @@
-import copy
-
 CHANGE_SYNTAX = {
     'added': '  + ',
     'removed': '  - ',
@@ -12,10 +10,8 @@ def make_line(change_type, key, value, level=0):
 
 
 def protect_value(value, exception):
-    if value is exception:
-        return exception
-    if isinstance(value, dict):
-        return copy.deepcopy(value)
+    if value is exception or isinstance(value, dict):
+        return value
     return str(value)
 
 
