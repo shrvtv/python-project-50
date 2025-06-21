@@ -21,68 +21,76 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def add_change(value, change):
-    if isinstance(value, dict):
-        if change == 'modified':
-            raise ValueError('Modified elements are processed by compare().')
-        new_value = {}
-        for key in value.keys():
-            new_value[key] = add_change(value[key], 'unchanged')
-        value = new_value
-    elif isinstance(value, tuple):  # The value is modified
-        first = add_change(value[0], 'removed')
-        second = add_change(value[1], 'added')
-        value = (first, second)
+def add_change(change, value, new_value=None):
+    if change == 'modified':
+        if new_value is None:
+            raise ValueError('Value is modified, but only old provided')
+        return {
+            'change': change,
+            'old': value,
+            'new': new_value
+        }
     return {
         'change': change,
         'value': value
     }
 
 
-def compare(old, new, root=True):
+def compare(old, new):
     old = utils.protect_value(old, exception=missing)
     new = utils.protect_value(new, exception=missing)
 
     if old == new:
-        return add_change(old, 'unchanged')
-    elif old is missing and new:
-        return add_change(new, 'added')
+        return add_change('unchanged', old)
+
+    if isinstance(old, dict) and isinstance(new, dict):
+        result = {}
+        for key in old.keys() | new.keys():
+            result[key] = compare(old.get(key, missing), new.get(key, missing))
+        return {
+            'change': 'modified',
+            'value': result
+        }
+    if old is missing and new:
+        return add_change('added', new)
     elif new is missing and old:
-        return add_change(old, 'removed')
+        return add_change('removed', old)
     else:
-        if isinstance(old, dict) and isinstance(new, dict):
-            all_keys = set(old.keys()).union(set(new.keys()))
-            result = {}
-            for key in all_keys:
-                result[key] = compare(
-                    old.get(key, missing),
-                    new.get(key, missing),
-                    root=False
-                )
-            return result if root else {
-                'change': 'modified',
-                'value': result
-            }
-        return add_change((old, new), 'modified')
+        return add_change('modified', old, new)
 
 
-def render(element, key=None, level=0):
+def is_tree(node):
+    return isinstance(node.get('value'), dict)
+
+
+def is_leaf(node):
+    return not is_tree(node)
+
+
+def render(element, key=None):
+    result = []
     change = element['change']
-    value = element['value']
-    if isinstance(value, tuple):
-        removed, added = value
-        return render(removed, key) + render(added, key)  # both are lists
+    if is_tree(element):
+        children = element['value']
+        for key in sorted(children.keys()):
+            result.extend(render(children[key], key))
+        return result
     else:
-        return [f"{level * '    '}{utils.CHANGE_SYNTAX[change]}{key}: {value}"]
+        if change == 'modified':
+            old, new = element['old'], element['new']
+            result.append(utils.make_line('removed', key, old))
+            result.append(utils.make_line('added', key, new))
+        else:
+            value = element['value']
+            result.append(utils.make_line(change, key, value))
+        return result
 
 
 def generate_diff(file1, file2):
     first = parse(file1)
     second = parse(file2)
-    comparison = compare(first, second)
-    lines = []
-    for k in sorted(comparison.keys()):
-        lines.extend(render(comparison[k], k))
+    lines = render(compare(first, second))
+
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 
 
