@@ -9,6 +9,10 @@ import gendiff.utilities as utils
 missing = object()
 
 
+def is_tree(node):
+    return isinstance(node.get('value'), dict)
+
+
 def parse(filename):
     current_location = os.getcwd()
     path = os.path.join(current_location, filename)
@@ -22,6 +26,17 @@ def parse(filename):
 
 
 def add_change(change, value, new_value=None):
+    if isinstance(value, dict):
+        result = {}
+        for key in value.keys():
+            result[key] = add_change(
+                'unchanged',
+                # Since these elements weren't protected by compare()
+                # they have to be protected here manually.
+                utils.protect_value(value[key], missing)
+            )
+        return result
+
     if change == 'modified':
         if new_value is None:
             raise ValueError('Value is modified, but only old provided')
@@ -57,14 +72,6 @@ def compare(old, new):
         return add_change('removed', old)
     else:
         return add_change('modified', old, new)
-
-
-def is_tree(node):
-    return isinstance(node.get('value'), dict)
-
-
-def is_leaf(node):
-    return not is_tree(node)
 
 
 def render(element, key=None):
