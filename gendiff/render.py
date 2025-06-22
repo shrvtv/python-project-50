@@ -1,39 +1,47 @@
 import gendiff.utilities as utils
 
 CHANGE_SYNTAX = {
-    'added': '  + ',
-    'removed': '  - ',
-    'unchanged': '    '
+    'added':     '  + ',
+    'removed':   '  - ',
+    'unchanged': '    ',
+    'modified':  '    '
 }
 
-INDENT_LENGTH = 4
+INDENT = 4 * ' '
 
 
-def make_tree(change_type, key='', level=0):
-    pass
+def make_tree(change, children, level, key=None):
+    if level == 0:  # root node check
+        start, end = '{', '}'
+    else:
+        # CHANGE_SYNTAX replaces 1 INDENT
+        start = f"{(level - 1) * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{'
+        end = f"{level * INDENT}" + '}'
+
+    return [start, *children, end]
 
 
-def make_leaf(change_type, key, value, level=0):
+def make_leaf(change_type, key, value, level):
     change_type = 'unchanged' if change_type == 'modified' else change_type
-    return f"{level * '    '}{CHANGE_SYNTAX[change_type]}{key}: {value}"
+    # CHANGE_SYNTAX replaces 1 INDENT
+    return (
+        f"{(level - 1) * '    '}{CHANGE_SYNTAX[change_type]}{key}: {value}"
+    ).rstrip()
 
 
-def render(element, key=None, level=None):
+def render(element, key=None, level=0):
     result = []
     change = element['change']
     if utils.is_tree(element):
-        if key:
-            result.append(
-                make_leaf(change, key, '{', 0 if level is None else level)
-            )
-        children = element['value']
-        for key in sorted(children.keys()):
-            result.extend(
-                render(children[key],
-                       key,
-                       0 if level is None else level + 1
-                )
-            )
+        value = element['value']
+        children = []
+        for k in sorted(value.keys()):
+            children.extend(render(
+                value[k],
+                k,
+                level + 1
+            ))
+        result.extend(make_tree(change, children, level, key))
         return result
     else:
         if change == 'modified':

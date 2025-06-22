@@ -62,7 +62,7 @@ def generate_diff(file1, file2):
     second = utils.parse(file2)
     lines = render.render(compare(first, second))
 
-    return utils.mimic_json('\n'.join(('{', *lines, '}')))
+    return utils.mimic_json('\n'.join(lines))
 
 
 def main():
