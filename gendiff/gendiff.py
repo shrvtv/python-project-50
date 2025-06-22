@@ -29,13 +29,15 @@ def add_change(change, value, new_value=None):
     if isinstance(value, dict):
         result = {}
         for key in value.keys():
-            result[key] = add_change(
-                'unchanged',
+            result[key] = add_change('unchanged',
                 # Since these elements weren't protected by compare()
                 # they have to be protected here manually.
                 utils.protect_value(value[key], missing)
             )
-        return result
+        return {
+        'change': change,
+        'value': result
+    }
 
     if change == 'modified':
         if new_value is None:
@@ -74,22 +76,27 @@ def compare(old, new):
         return add_change('modified', old, new)
 
 
-def render(element, key=None):
+def render(element, key=None, level=None):
     result = []
     change = element['change']
     if is_tree(element):
         children = element['value']
         for key in sorted(children.keys()):
-            result.extend(render(children[key], key))
+            result.extend(
+                render(children[key],
+                       key,
+                       0 if level is None else level + 1
+                )
+            )
         return result
     else:
         if change == 'modified':
             old, new = element['old'], element['new']
-            result.append(utils.make_line('removed', key, old))
-            result.append(utils.make_line('added', key, new))
+            result.append(utils.make_line('removed', key, old, level))
+            result.append(utils.make_line('added', key, new, level))
         else:
             value = element['value']
-            result.append(utils.make_line(change, key, value))
+            result.append(utils.make_line(change, key, value, level))
         return result
 
 
