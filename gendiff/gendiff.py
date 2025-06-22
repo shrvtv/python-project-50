@@ -1,28 +1,9 @@
 import argparse
-import json
-import os
 
-import yaml
-
+import gendiff.render as render
 import gendiff.utilities as utils
 
 missing = object()
-
-
-def is_tree(node):
-    return isinstance(node.get('value'), dict)
-
-
-def parse(filename):
-    current_location = os.getcwd()
-    path = os.path.join(current_location, filename)
-    file = open(path)
-    if filename.endswith('.json'):
-        return json.load(file)
-    elif filename.endswith('.yaml') or filename.endswith('.yml'):
-        return yaml.safe_load(file)
-    else:
-        raise ValueError('Invalid file type')
 
 
 def add_change(change, value, new_value=None):
@@ -76,34 +57,10 @@ def compare(old, new):
         return add_change('modified', old, new)
 
 
-def render(element, key=None, level=None):
-    result = []
-    change = element['change']
-    if is_tree(element):
-        children = element['value']
-        for key in sorted(children.keys()):
-            result.extend(
-                render(children[key],
-                       key,
-                       0 if level is None else level + 1
-                )
-            )
-        return result
-    else:
-        if change == 'modified':
-            old, new = element['old'], element['new']
-            result.append(utils.make_line('removed', key, old, level))
-            result.append(utils.make_line('added', key, new, level))
-        else:
-            value = element['value']
-            result.append(utils.make_line(change, key, value, level))
-        return result
-
-
 def generate_diff(file1, file2):
-    first = parse(file1)
-    second = parse(file2)
-    lines = render(compare(first, second))
+    first = utils.parse(file1)
+    second = utils.parse(file2)
+    lines = render.render(compare(first, second))
 
     return utils.mimic_json('\n'.join(('{', *lines, '}')))
 

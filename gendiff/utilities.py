@@ -1,12 +1,23 @@
-CHANGE_SYNTAX = {
-    'added': '  + ',
-    'removed': '  - ',
-    'unchanged': '    '
-}
+import json
+import os
+
+import yaml
 
 
-def make_line(change_type, key, value, level=0):
-    return f"{level * '    '}{CHANGE_SYNTAX[change_type]}{key}: {value}"
+def make_path(path, key):
+    return path + ('.' if path else '') + key
+
+
+def parse(filename):
+    current_location = os.getcwd()
+    path = os.path.join(current_location, filename)
+    file = open(path)
+    if filename.endswith('.json'):
+        return json.load(file)
+    elif filename.endswith('.yaml') or filename.endswith('.yml'):
+        return yaml.safe_load(file)
+    else:
+        raise ValueError('Invalid file type')
 
 
 def protect_value(value, exception):
@@ -15,12 +26,12 @@ def protect_value(value, exception):
     return str(value)
 
 
+def is_tree(node):
+    return isinstance(node.get('value'), dict)
+
+
 def mimic_json(text):
     text = text.replace('True', 'true')
     text = text.replace('False', 'false')
     text = text.replace('None', 'null')
     return text
-
-
-def make_path(path, key):
-    return path + ('.' if path else '') + key
