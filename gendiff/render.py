@@ -33,14 +33,14 @@ def render_node(change, value, level, key=None):
             ).rstrip()]
 
 
-def render(element, key=None, level=0):
+def stylish(element, key=None, level=0):
     result = []
     change = element['change']
     if utils.is_tree(element):
         value = element['value']
         children = []
         for k in sorted(value.keys()):
-            children.extend(render(
+            children.extend(stylish(
                 value[k],
                 k,
                 level + 1

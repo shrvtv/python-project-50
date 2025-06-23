@@ -58,10 +58,13 @@ def compare(old, new):
         return add_change('modified', old, new)
 
 
-def generate_diff(file1, file2):
+def generate_diff(file1, file2, format='stylish'):
     first = utils.parse(file1)
     second = utils.parse(file2)
-    lines = render.render(compare(first, second))
+    if format == 'stylish':
+        lines = render.stylish(compare(first, second))
+    else:
+        lines = []
 
     return utils.mimic_json('\n'.join(lines))
 
@@ -79,7 +82,7 @@ def main():
 
     args = parser.parse_args()
 
-    print(generate_diff(args.first_file, args.second_file))
+    print(generate_diff(args.first_file, args.second_file, args.format))
 
 
 if __name__ == "__main__":
