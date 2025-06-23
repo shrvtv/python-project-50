@@ -17,8 +17,8 @@ def render_node(change, value, level, key=None):
             start, end = '{', '}'
         else:
             # CHANGE_SYNTAX replaces 1 INDENT
-            start = f"{(level - 1) * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{'
-            end = f"{level * INDENT}" + '}'
+            start = f"{(level - 1) * INDENT}{CHANGE_SYNTAX[change]}{key}: {{"
+            end = f"{level * INDENT}}}"
 
         return [start, *value, end]
 
