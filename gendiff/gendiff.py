@@ -7,6 +7,15 @@ missing = object()
 
 
 def add_change(change, value, new_value=None):
+    if change == 'modified':
+        if new_value is None:
+            raise ValueError('Value is modified, but only old provided')
+        return {
+            'change': change,
+            'old': value,
+            'new': new_value
+        }
+
     if isinstance(value, dict):
         result = {}
         for key in value.keys():
@@ -20,14 +29,6 @@ def add_change(change, value, new_value=None):
         'value': result
     }
 
-    if change == 'modified':
-        if new_value is None:
-            raise ValueError('Value is modified, but only old provided')
-        return {
-            'change': change,
-            'old': value,
-            'new': new_value
-        }
     return {
         'change': change,
         'value': value
@@ -46,7 +47,7 @@ def compare(old, new):
         for key in old.keys() | new.keys():
             result[key] = compare(old.get(key, missing), new.get(key, missing))
         return {
-            'change': 'modified',
+            'change': 'modified_dict',
             'value': result
         }
     if old is missing and new:
