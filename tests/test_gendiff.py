@@ -24,20 +24,20 @@ def test_generate_diff_flat_mixed():
 
 def test_generate_diff_recursive_json():
     assert generate_diff(
-        'tests/test_data/stylish_recursive/json/file1.json',
-        'tests/test_data/stylish_recursive/json/file2.json'
+        'tests/test_data/recursive/json/file1.json',
+        'tests/test_data/recursive/json/file2.json'
     ) == open('tests/test_data/results/stylish_recursive').read()
 
 
 def test_generate_diff_recursive_yaml():
     assert generate_diff(
-        'tests/test_data/stylish_recursive/yaml/file1.yml',
-        'tests/test_data/stylish_recursive/yaml/file2.yaml'
+        'tests/test_data/recursive/yaml/file1.yml',
+        'tests/test_data/recursive/yaml/file2.yaml'
     ) == open('tests/test_data/results/stylish_recursive').read()
 
 
 def test_generate_diff_recursive_mixed():
     assert generate_diff(
-        'tests/test_data/stylish_recursive/json/file1.json',
-        'tests/test_data/stylish_recursive/yaml/file2.yaml'
+        'tests/test_data/recursive/json/file1.json',
+        'tests/test_data/recursive/yaml/file2.yaml'
     ) == open('tests/test_data/results/stylish_recursive').read()
