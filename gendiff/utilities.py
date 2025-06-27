@@ -3,6 +3,8 @@ import os
 
 import yaml
 
+missing = object()
+
 
 def make_path(path, key):
     return path + ('.' if path else '') + key
@@ -20,14 +22,20 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def protect_value(value, exception):
+def protect_value(value, exception=missing):
     if value is exception or isinstance(value, dict):
         return value
     return str(value)
 
 
-def is_tree(node):
-    return isinstance(node.get('value'), dict)
+def flatten(data):
+    result = []
+    for element in data:
+        if isinstance(element, list):
+            result.extend(flatten(element))
+        else:
+            result.append(element)
+    return result
 
 
 def mimic_json(text):

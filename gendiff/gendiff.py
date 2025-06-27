@@ -3,32 +3,8 @@ import argparse
 import gendiff.render as render
 import gendiff.utilities as utils
 
-missing = object()
 
-
-def add_change(change, value, new_value=None):
-    if change == 'modified':
-        if new_value is None:
-            raise ValueError('Value is modified, but only old provided')
-        return {
-            'change': change,
-            'old': value,
-            'new': new_value
-        }
-
-    if isinstance(value, dict):
-        result = {}
-        for key in value.keys():
-            result[key] = add_change('unchanged',
-                # Since these elements weren't protected by compare()
-                # they have to be protected here manually.
-                utils.protect_value(value[key], missing)
-            )
-        return {
-        'change': change,
-        'value': result
-    }
-
+def add_change(change, value):
     return {
         'change': change,
         'value': value
@@ -36,36 +12,31 @@ def add_change(change, value, new_value=None):
 
 
 def compare(old, new):
-    old = utils.protect_value(old, exception=missing)
-    new = utils.protect_value(new, exception=missing)
+    old = utils.protect_value(old)
+    new = utils.protect_value(new)
 
     if old == new:
-        return add_change('unchanged', old)
+        return add_change('untouched', old)
+    if new is utils.missing:
+        return add_change('removed', old)
+    if old is utils.missing:
+        return add_change('added', new)
 
     if isinstance(old, dict) and isinstance(new, dict):
-        result = {}
+        diff = {}
         for key in old.keys() | new.keys():
-            result[key] = compare(old.get(key, missing), new.get(key, missing))
-        return {
-            'change': 'modified_dict',
-            'value': result
-        }
-    if old is missing and new:
-        return add_change('added', new)
-    elif new is missing and old:
-        return add_change('removed', old)
+            diff[key] = compare(
+                old.get(key, utils.missing), new.get(key, utils.missing)
+            )
+        return add_change('updated', diff)
     else:
-        return add_change('modified', old, new)
+        return add_change('updated', (old, new))
 
 
-def generate_diff(file1, file2, format='stylish'):
+def generate_diff(file1, file2, mode='stylish'):
     first = utils.parse(file1)
     second = utils.parse(file2)
-    if format == 'stylish':
-        lines = render.stylish(compare(first, second))
-    else:
-        lines = []
-
+    lines = render.render(mode, compare(first, second))
     return utils.mimic_json('\n'.join(lines))
 
 

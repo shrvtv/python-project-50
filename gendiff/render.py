@@ -3,56 +3,40 @@ import gendiff.utilities as utils
 CHANGE_SYNTAX = {
     'added':          '  + ',
     'removed':        '  - ',
-    'unchanged':      '    ',
-    'modified_dict':  '    '
+    'untouched':      '    '
 }
 
 INDENT = 4 * ' '
 
 
-def render_node(change, value, level, key=None):
-    # CHANGE_SYNTAX replaces 1 INDENT
-    if isinstance(value, list):
-        if level == 0:  # root node check
-            start, end = '{', '}'
-        else:
-            # CHANGE_SYNTAX replaces 1 INDENT
-            start = f"{(level - 1) * INDENT}{CHANGE_SYNTAX[change]}{key}: {{"
-            end = f"{level * INDENT}}}"
-
-        return [start, *value, end]
-
-    if isinstance(value, dict):
-        children = []
-        for k in sorted(value.keys()):
-            children.extend(render_node('unchanged', value[k], level + 1, k))
-        return render_node(change, children, level, key)
-
-    return [(
-                f"{(level - 1) * '    '}{CHANGE_SYNTAX[change]}{key}: {value}"
-            ).rstrip()]
+def make(change, key, value, level):
+    if not isinstance(value, dict):
+        return [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {value}"]
+    # result = [(f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {{")]
+    # result.append(f"{(level + 1) * INDENT}" + '}')
+    # return result
 
 
-def stylish(element, key=None, level=0):
+def stylish(tree, level=0):
     result = []
-    change = element['change']
-    if utils.is_tree(element):
-        value = element['value']
-        children = []
-        for k in sorted(value.keys()):
-            children.extend(stylish(
-                value[k],
-                k,
-                level + 1
-            ))
-        result.extend(render_node(change, children, level, key))
-        return result
-    else:
-        if change == 'modified':
-            old, new = element['old'], element['new']
-            result.extend(render_node('removed', old, level, key))
-            result.extend(render_node('added', new, level, key))
+    for key in sorted(tree):
+        element = tree[key]
+        change, value = element['change'], element['value']
+        if change == 'updated':
+            if isinstance(value, tuple):
+                old, new = value
+                result.extend(make('removed', key, old, level))
+                result.extend(make('added', key, new, level))
+            else:
+                result.extend(make('untouched', key, value, level))
         else:
-            value = element['value']
-            result.extend(render_node(change, value, level, key))
-        return result
+            result.extend(make(change, key, value, level))
+    return ['{', result, '}'] if level == 0 else result
+
+
+def render(mode, tree):
+    if mode == 'stylish':
+        formatter = stylish
+    else:
+        raise ValueError('Unknown formatting selected')
+    return utils.flatten(formatter(tree['value']))
