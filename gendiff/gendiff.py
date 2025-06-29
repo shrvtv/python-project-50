@@ -26,12 +26,18 @@ def stylish(first, second, level=0):
                     level
                 ))
             else:
-                result.extend(render.make_stylish('updated', key, (old, new), level))
+                result.extend(render.make_stylish(
+                    'updated',
+                    key,
+                    (old, new),
+                    level
+                ))
     return result
 
 
 def plain(first, second):
     pass
+
 
 def generate_diff(file1, file2, mode='stylish'):
     first = utils.parse(file1)
