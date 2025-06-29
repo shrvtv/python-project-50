@@ -3,41 +3,38 @@ import argparse
 import gendiff.render as render
 import gendiff.utilities as utils
 
-
-def add_change(change, value):
-    return {
-        'change': change,
-        'value': value
-    }
+missing = object()
 
 
-def compare(old, new):
-    old = utils.protect_value(old)
-    new = utils.protect_value(new)
-
-    if old == new:
-        return add_change('untouched', old)
-    if new is utils.missing:
-        return add_change('removed', old)
-    if old is utils.missing:
-        return add_change('added', new)
-
-    if isinstance(old, dict) and isinstance(new, dict):
-        diff = {}
-        for key in old.keys() | new.keys():
-            diff[key] = compare(
-                old.get(key, utils.missing), new.get(key, utils.missing)
-            )
-        return add_change('updated', diff)
-    else:
-        return add_change('updated', (old, new))
+def compare(first, second, level=0):
+    result = []
+    for key in sorted(first.keys() | second.keys()):
+        old = first.get(key, missing)
+        new = second.get(key, missing)
+        if new is missing:
+            result.extend(render.make('removed', key, old, level))
+        elif old is missing:
+            result.extend(render.make('added', key, new, level))
+        elif old == new:
+            result.extend(render.make('untouched', key, old, level))
+        else:
+            if isinstance(old, dict) and isinstance(new, dict):
+                result.extend(render.make(
+                    'updated_dict',
+                    key,
+                    compare(old, new, level + 1),
+                    level
+                ))
+            else:
+                result.extend(render.make('updated', key, (old, new), level))
+    return result
 
 
 def generate_diff(file1, file2, mode='stylish'):
     first = utils.parse(file1)
     second = utils.parse(file2)
-    lines = render.render(mode, compare(first, second))
-    return utils.mimic_json('\n'.join(lines))
+    lines = compare(first, second)
+    return render.render(mode, lines)
 
 
 def main():

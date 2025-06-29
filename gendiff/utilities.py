@@ -3,12 +3,6 @@ import os
 
 import yaml
 
-missing = object()
-
-
-def make_path(path, key):
-    return path + ('.' if path else '') + key
-
 
 def parse(filename):
     current_location = os.getcwd()
@@ -20,12 +14,6 @@ def parse(filename):
         return yaml.safe_load(file)
     else:
         raise ValueError('Invalid file type')
-
-
-def protect_value(value, exception=missing):
-    if value is exception or isinstance(value, dict):
-        return value
-    return str(value)
 
 
 def flatten(data):
