@@ -1,7 +1,7 @@
 import gendiff.utilities as utils
 
 
-def make(change, key, value, level):
+def make_stylish(change, key, value, level):
     CHANGE_SYNTAX = {
         'added': '  + ',
         'removed': '  - ',
@@ -12,8 +12,8 @@ def make(change, key, value, level):
     if change == 'updated':
         old, new = value
         return [
-            make('removed', key, old, level),
-            make('added', key, new, level)
+            make_stylish('removed', key, old, level),
+            make_stylish('added', key, new, level)
         ]
 
     def line():
@@ -27,19 +27,11 @@ def make(change, key, value, level):
             result.extend(utils.flatten(value))
         else:
             for k in sorted(value.keys()):
-                result.extend(make('untouched', k, value[k], level + 1))
+                result.extend(make_stylish('untouched', k, value[k], level + 1))
         result.append((level + 1) * INDENT + '}')
         return result
     return tree() if isinstance(value, (dict, list)) else line()
 
 
-def stylish(lines):
-    return utils.flatten(['{', lines, '}'])
-
-
-def render(mode, lines):
-    if mode == 'stylish':
-        formatter = stylish
-    else:
-        raise ValueError('Unknown formatting selected')
-    return utils.mimic_json('\n'.join(formatter(lines)))
+def make_plain(change, key, value, location):
+    pass
