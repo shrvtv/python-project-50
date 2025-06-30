@@ -37,7 +37,7 @@ def plain_convert(value):
     if isinstance(value, dict):
         return "[complex value]"
     if isinstance(value, str):
-       return f"'{value}'"
+        return f"'{value}'"
     return str(value)
 
 

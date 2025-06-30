@@ -53,7 +53,9 @@ def plain(first, second, location=''):
             if isinstance(old, dict) and isinstance(new, dict):
                 result.extend(plain(old, new, locate(key)))
             else:
-                result.append(render.make_plain('updated', locate(key), (old, new)))
+                result.append(render.make_plain(
+                    'updated', locate(key), (old, new)
+                ))
     return result
 
 
