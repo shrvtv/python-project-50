@@ -47,3 +47,12 @@ def test_generate_diff_recursive_mixed():
         'tests/test_data/recursive/yaml/file2.yaml',
         'stylish'
     ) == open('tests/test_data/results/stylish_recursive').read()
+
+
+def test_generate_diff_plain_mixed():
+    assert generate_diff(
+        'tests/test_data/recursive/json/file1.json',
+        'tests/test_data/recursive/yaml/file2.yaml',
+        'plain'
+    ) == open('tests/test_data/results/plain_recursive').read()
+

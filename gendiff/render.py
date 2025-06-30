@@ -33,5 +33,19 @@ def make_stylish(change, key, value, level):
     return tree() if isinstance(value, (dict, list)) else line()
 
 
-def make_plain(change, key, value, location):
-    pass
+def plain_convert(value):
+    if isinstance(value, dict):
+        return "[complex value]"
+    if isinstance(value, str):
+       return f"'{value}'"
+    return str(value)
+
+
+def make_plain(change, key_location, value):
+    result = f"Property '{key_location}' was {change}"  # covers the 'removed'
+    if change == 'added':
+        result += f" with value: {plain_convert(value)}"
+    elif change == 'updated':
+        old, new = value
+        result += f". From {plain_convert(old)} to {plain_convert(new)}"
+    return result
