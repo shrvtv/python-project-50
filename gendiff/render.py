@@ -17,9 +17,7 @@ def make_stylish(change, key, value, level):
         ]
 
     def line():
-        return [
-            f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {value}".rstrip()
-        ]
+        return [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {value}"]
 
     def tree():
         result = [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{']
