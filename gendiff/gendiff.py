@@ -99,7 +99,7 @@ def generate_diff(file1, file2, mode='stylish'):
     new = utils.parse(file2)
     if mode == 'stylish':
         lines = utils.flatten(['{', stylish(old, new), '}'])
-        return utils.mimic_json('\n'.join(lines))
+        return utils.mimic_json('\n'.join([l.rstrip() for l in lines]))
     elif mode == 'plain':
         lines = utils.flatten(plain(old, new))
         return utils.mimic_json('\n'.join(lines))
