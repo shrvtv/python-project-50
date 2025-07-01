@@ -94,7 +94,7 @@ def jsonify(first, second):
     return result
 
 
-def generate_diff(file1, file2, mode):
+def generate_diff(file1, file2, mode='stylish'):
     old = utils.parse(file1)
     new = utils.parse(file2)
     if mode == 'stylish':
