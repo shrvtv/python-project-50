@@ -5,7 +5,10 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=shrvtv_python-project-50&metric=coverage)](https://sonarcloud.io/summary/new_code?id=shrvtv_python-project-50)
 
 ### Demonstration (mixed file type)
-#### Recursive comparison with stylish output
+#### Recursive comparison with JSON output
+[![asciicast](https://asciinema.org/a/mtx8euqcDUCtl8mm25He1Km8S.svg)](https://asciinema.org/a/mtx8euqcDUCtl8mm25He1Km8S)
+
+#### Recursive with stylish output
 [![asciicast](https://asciinema.org/a/h7wfqlt5cBrvPYiCcI37H3ns9.svg)](https://asciinema.org/a/h7wfqlt5cBrvPYiCcI37H3ns9)
 
 #### Recursive comparison with plain output

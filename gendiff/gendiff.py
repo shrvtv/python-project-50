@@ -1,4 +1,5 @@
 import argparse
+import json
 
 import gendiff.render as render
 import gendiff.utilities as utils
@@ -59,16 +60,53 @@ def plain(first, second, location=''):
     return result
 
 
-def generate_diff(file1, file2, mode='stylish'):
-    first = utils.parse(file1)
-    second = utils.parse(file2)
+def jsonify(first, second):
+    result = {}
+    for key in sorted(first.keys() | second.keys()):
+        old, new = first.get(key, missing), second.get(key, missing)
+        if isinstance(old, dict) and isinstance(new, dict):
+            result[key] = {
+                'change': 'updated',
+                'value': jsonify(old, new)
+            }
+        else:
+            if old is missing:
+                result[key] = {
+                    'change': 'added',
+                    'value': new
+                }
+            elif new is missing:
+                result[key] = {
+                    'change': 'removed',
+                    'value': old
+                }
+            elif old == new:
+                result[key] = {
+                    'change': 'untouched',
+                    'value': old
+                }
+            else:
+                result[key] = {
+                    'change': 'updated',
+                    'old_value': old,
+                    'new_value': new
+                }
+    return result
+
+
+def generate_diff(mode, file1, file2):
+    old = utils.parse(file1)
+    new = utils.parse(file2)
     if mode == 'stylish':
-        lines = utils.flatten(['{', stylish(first, second), '}'])
+        lines = utils.flatten(['{', stylish(old, new), '}'])
+        return utils.mimic_json('\n'.join(lines))
     elif mode == 'plain':
-        lines = utils.flatten(plain(first, second))
+        lines = utils.flatten(plain(old, new))
+        return utils.mimic_json('\n'.join(lines))
+    elif mode == 'json':
+        return json.dumps(jsonify(old, new))
     else:
         raise ValueError('Unknown style selected')
-    return utils.mimic_json('\n'.join(lines))
 
 
 def main():
@@ -85,7 +123,7 @@ def main():
 
     args = parser.parse_args()
 
-    print(generate_diff(args.first_file, args.second_file, args.format))
+    print(generate_diff(args.format, args.first_file, args.second_file))
 
 
 if __name__ == "__main__":
