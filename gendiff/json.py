@@ -1,3 +1,5 @@
+import json
+
 from gendiff.utilities import missing
 
 
@@ -32,4 +34,4 @@ def render(first, second):
                     'old_value': old,
                     'new_value': new
                 }
-    return result
+    return json.dumps(result)

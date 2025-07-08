@@ -1,5 +1,4 @@
 import argparse
-import json
 
 import gendiff.utilities as utils
 from gendiff.json import render as render_json
@@ -14,10 +13,9 @@ def generate_diff(file1, file2, mode='stylish'):
         lines = utils.flatten(['{', render_stylish(old, new), '}'])
         return utils.mimic_json('\n'.join(lines))
     elif mode == 'plain':
-        lines = utils.flatten(render_plain(old, new))
-        return utils.mimic_json('\n'.join(lines))
+        return utils.mimic_json('\n'.join(render_plain(old, new)))
     elif mode == 'json':
-        return json.dumps(render_json(old, new))
+        return render_json(old, new)
     else:
         raise ValueError('Unknown style selected')
 
