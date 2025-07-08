@@ -1,9 +1,9 @@
 import argparse
 
 import gendiff.utilities as utils
-from gendiff.json import render as render_json
-from gendiff.plain import render as render_plain
-from gendiff.stylish import render as render_stylish
+from gendiff.renderers.json import render as render_json
+from gendiff.renderers.plain import render as render_plain
+from gendiff.renderers.stylish import render as render_stylish
 
 
 def generate_diff(file1, file2, mode='stylish'):
