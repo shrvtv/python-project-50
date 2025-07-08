@@ -3,6 +3,8 @@ import os
 
 import yaml
 
+missing = object()
+
 
 def parse(filename):
     current_location = os.getcwd()
