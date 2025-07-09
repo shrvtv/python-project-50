@@ -1,41 +1,42 @@
-from gendiff.utilities import missing
+def is_tree(node):
+    return True if isinstance(node, dict) and 'children' in node.keys() else False
 
+def get_converted_value(node, key):
+    if is_tree(node):
+        return "[complex value]"
 
-def convert(value):
-    if isinstance(value, dict):
+    value = node[key]
+    if is_tree(value):
         return "[complex value]"
     if isinstance(value, str):
         return f"'{value}'"
     return str(value)
 
 
-def make_line(change, key_location, value):
+def make_line(node, key_location):
+    change = node['change']
     result = f"Property '{key_location}' was {change}"  # covers the 'removed'
     if change == 'added':
-        result += f" with value: {convert(value)}"
+        result += f" with value: {get_converted_value(node, 'value')}"
     elif change == 'updated':
-        old, new = value
-        result += f". From {convert(old)} to {convert(new)}"
+        result += f". From {get_converted_value(node, 'old')} to {get_converted_value(node, 'new')}"
     return result
 
 
-def render(first, second, location=''):
+def render(comparison, location=''):
     def locate(k):
         if location == '':
             return k
         return location + '.' + k
 
+
+
     result = []
-    for key in sorted(first.keys() | second.keys()):
-        old = first.get(key, missing)
-        new = second.get(key, missing)
-        if new is missing:
-            result.append(make_line('removed', locate(key), old))
-        elif old is missing:
-            result.append(make_line('added', locate(key), new))
-        elif old != new:
-            if isinstance(old, dict) and isinstance(new, dict):
-                result.extend(render(old, new, locate(key)))
-            else:
-                result.append(make_line('updated', locate(key), (old, new)))
+    for key in sorted(comparison.keys()):
+        node = comparison[key]
+        change = node['change']
+        if is_tree(node) and change == 'updated':
+            result.extend(render(node['children'], locate(key)))
+        elif change != 'untouched':
+            result.append(make_line(node, locate(key)))
     return result

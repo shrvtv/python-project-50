@@ -19,6 +19,11 @@ def build_node(change, value, is_diff=False):
 
     if change == 'updated':
         old, new = value
+        if isinstance(old, dict):
+            old = build_node('untouched', old)
+        if isinstance(new, dict):
+            build_node('untouched', new)
+
         return {
             'change': change,
             'old': old,
