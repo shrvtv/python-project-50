@@ -1,5 +1,8 @@
 def is_tree(node):
-    return True if isinstance(node, dict) and 'children' in node.keys() else False
+    return (
+        True if isinstance(node, dict) and 'children' in node.keys() else False
+    )
+
 
 def get_converted_value(node, key):
     if is_tree(node):
@@ -19,7 +22,10 @@ def make_line(node, key_location):
     if change == 'added':
         result += f" with value: {get_converted_value(node, 'value')}"
     elif change == 'updated':
-        result += f". From {get_converted_value(node, 'old')} to {get_converted_value(node, 'new')}"
+        result += (
+            f". From {get_converted_value(node, 'old')} to "
+            f"{get_converted_value(node, 'new')}"
+        )
     return result
 
 
@@ -28,8 +34,6 @@ def render(comparison, location=''):
         if location == '':
             return k
         return location + '.' + k
-
-
 
     result = []
     for key in sorted(comparison.keys()):
