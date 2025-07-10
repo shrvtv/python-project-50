@@ -1,4 +1,4 @@
-from gendiff.utilities import flatten, is_tree
+from gendiff.utilities import is_tree
 
 CHANGE_SYNTAX = {
         'added': '  + ',
@@ -10,18 +10,41 @@ CHANGE_SYNTAX = {
 INDENT = 4 * ' '
 
 
-def make(level, change, key, data):
-    def line():
-        return [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {data}"]
+def make(level, change, key, node):
+    def line(c, v):
+        return [f"{level * INDENT}{CHANGE_SYNTAX[c]}{key}: {v}"]
 
-    def tree():
+    def wrap_tree(change, processed_tree):
         result = [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{']
-        if change == 'updated_dict':
-            result.extend(data)
+        result.extend(processed_tree)
         result.append((level + 1) * INDENT + '}')
         return result
 
-    return tree() if isinstance(data, (dict, list)) else line()
+    def tree(change, children):
+        result = []
+        for k, n in children.items():
+            result.extend(make(level + 1, n['change'], k, n))
+        return wrap_tree(change, result)
+
+    if change == 'updated_dict':
+        return wrap_tree(change, node)
+    if is_tree(node):
+        return tree(change, node['children'])
+
+    if change == 'updated':
+        old, new = node['old'], node['new']
+        old = (
+            tree('removed', old['children'])
+            if is_tree(old)
+            else line('removed', old)
+        )
+        new = (
+            tree('added', new['children'])
+            if is_tree(new)
+            else line('added', new)
+        )
+        return [*old, *new]
+    return line(change, node['value'])
 
 
 def render(comparison, level=0):
@@ -29,20 +52,13 @@ def render(comparison, level=0):
     for key in sorted(comparison.keys()):
         node = comparison[key]
         change = node['change']
-        if change == 'updated':
-            if is_tree(node):
-                result.extend(make(
-                    level, 
-                    "updated_dict", 
-                    key,
-                    render(node['children'], level + 1)
-                ))
-            else:
-                result.extend(make(level, 'removed', key, node['old']))
-                result.extend(make(level, 'added', key, node['new']))
+        if is_tree(node) and change == 'updated':
+            result.extend(make(
+                level, 
+                "updated_dict", 
+                key,
+                render(node['children'], level + 1)
+            ))
         else:
-            if is_tree(node):
-                result.extend(make(level, change, key, node['children']))
-            else:
-                result.extend(make(level, change, key, node['value']))
+            result.extend(make(level, change, key, node))
     return result
