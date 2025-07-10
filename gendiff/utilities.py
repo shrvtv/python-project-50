@@ -18,6 +18,12 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
+def is_tree(node):
+    return (
+        True if isinstance(node, dict) and 'children' in node.keys() else False
+    )
+
+
 def flatten(data):
     result = []
     for element in data:

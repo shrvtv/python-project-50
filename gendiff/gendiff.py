@@ -14,7 +14,7 @@ def generate_diff(file1, file2, mode='stylish'):
     if mode == 'json':
         return json.dumps(comparison, sort_keys=True)
     if mode == 'stylish':
-        lines = utils.flatten(['{', stylish.render(old, new), '}'])
+        lines = utils.flatten(['{', stylish.render(comparison), '}'])
     elif mode == 'plain':
         lines = plain.render(comparison)
     else:

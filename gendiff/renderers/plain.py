@@ -1,7 +1,4 @@
-def is_tree(node):
-    return (
-        True if isinstance(node, dict) and 'children' in node.keys() else False
-    )
+from gendiff.utilities import is_tree
 
 
 def get_converted_value(node, key):
