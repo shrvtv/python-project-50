@@ -1,25 +1,25 @@
 import argparse
+import json
 
 import gendiff.diff as diff
+import gendiff.renderers.plain as plain
+import gendiff.renderers.stylish as stylish
 import gendiff.utilities as utils
-from gendiff.renderers.json import render as render_json
-from gendiff.renderers.plain import render as render_plain
-from gendiff.renderers.stylish import render as render_stylish
 
 
 def generate_diff(file1, file2, mode='stylish'):
     old = utils.parse(file1)
     new = utils.parse(file2)
     comparison = diff.compare(old, new)
+    if mode == 'json':
+        return json.dumps(comparison, sort_keys=True)
     if mode == 'stylish':
-        lines = utils.flatten(['{', render_stylish(old, new), '}'])
-        return utils.mimic_json('\n'.join(lines))
+        lines = utils.flatten(['{', stylish.render(old, new), '}'])
     elif mode == 'plain':
-        return utils.mimic_json('\n'.join(render_plain(comparison)))
-    elif mode == 'json':
-        return render_json(old, new)
+        lines = plain.render(comparison)
     else:
         raise ValueError('Unknown style selected')
+    return utils.mimic_json('\n'.join(lines))
 
 
 def main():
