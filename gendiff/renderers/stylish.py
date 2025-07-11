@@ -1,33 +1,32 @@
 from gendiff.utilities import is_tree
 
 CHANGE_SYNTAX = {
-        'added': '  + ',
-        'removed': '  - ',
-        'untouched': '    ',
+        'added':        '  + ',
+        'removed':      '  - ',
+        'untouched':    '    ',
         'updated_dict': '    '
         }
 
 INDENT = 4 * ' '
 
 
+def wrap_tree(level, change, key, processed_tree):
+    result = [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{']
+    result.extend(processed_tree)
+    result.append((level + 1) * INDENT + '}')
+    return result
+
+
 def make(level, change, key, node):
     def line(c, v):
         return [f"{level * INDENT}{CHANGE_SYNTAX[c]}{key}: {v}"]
-
-    def wrap_tree(change, processed_tree):
-        result = [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{']
-        result.extend(processed_tree)
-        result.append((level + 1) * INDENT + '}')
-        return result
 
     def tree(change, children):
         result = []
         for k, n in children.items():
             result.extend(make(level + 1, n['change'], k, n))
-        return wrap_tree(change, result)
+        return wrap_tree(level, change, key, result)
 
-    if change == 'updated_dict':
-        return wrap_tree(change, node)
     if is_tree(node):
         return tree(change, node['children'])
 
@@ -53,7 +52,7 @@ def render(comparison, level=0):
         node = comparison[key]
         change = node['change']
         if is_tree(node) and change == 'updated':
-            result.extend(make(
+            result.extend(wrap_tree(
                 level, 
                 "updated_dict", 
                 key,
