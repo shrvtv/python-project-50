@@ -1,3 +1,5 @@
+from typing import Any
+
 from gendiff.utilities import is_tree
 
 CHANGE_SYNTAX = {
@@ -10,18 +12,18 @@ CHANGE_SYNTAX = {
 INDENT = 4 * ' '
 
 
-def wrap_tree(level, change, key, processed_tree):
+def wrap_tree(level: int, change: str, key: str, processed_tree: list) -> list:
     result = [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: " + '{']
     result.extend(processed_tree)
     result.append((level + 1) * INDENT + '}')
     return result
 
 
-def make(level, change, key, node):
-    def line(c, v):
-        return [f"{level * INDENT}{CHANGE_SYNTAX[c]}{key}: {v}"]
+def make(level: int, change: str, key: str, node: dict) -> list:
+    def line(change: str, value: Any) -> list:
+        return [f"{level * INDENT}{CHANGE_SYNTAX[change]}{key}: {value}"]
 
-    def tree(change, children):
+    def tree(change: str, children: dict) -> list:
         result = []
         for k, n in children.items():
             result.extend(make(level + 1, n['change'], k, n))
@@ -46,7 +48,7 @@ def make(level, change, key, node):
     return line(change, node['value'])
 
 
-def render(comparison, level=0):
+def render(comparison: dict, level: int = 0) -> list:
     result = []
     for key in sorted(comparison.keys()):
         node = comparison[key]
