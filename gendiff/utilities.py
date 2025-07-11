@@ -6,7 +6,7 @@ import yaml
 missing = object()
 
 
-def parse(filename):
+def parse(filename: str) ->dict:
     current_location = os.getcwd()
     path = os.path.join(current_location, filename)
     file = open(path)
@@ -18,13 +18,13 @@ def parse(filename):
         raise ValueError('Invalid file type')
 
 
-def is_tree(node):
+def is_tree(node) -> bool:
     return (
         True if isinstance(node, dict) and 'children' in node.keys() else False
     )
 
 
-def flatten(data):
+def flatten(data: list) -> list:
     result = []
     for element in data:
         if isinstance(element, list):
@@ -34,7 +34,7 @@ def flatten(data):
     return result
 
 
-def mimic_json(text):
+def mimic_json(text: str) -> str:
     text = text.replace('True', 'true')
     text = text.replace('False', 'false')
     text = text.replace('None', 'null')
