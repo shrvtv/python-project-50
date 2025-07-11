@@ -1,7 +1,7 @@
 from gendiff.utilities import is_tree
 
 
-def get_converted_value(node, key):
+def get_converted_value(node: dict, key: str) -> str:
     if is_tree(node):
         return "[complex value]"
 
@@ -13,7 +13,7 @@ def get_converted_value(node, key):
     return str(value)
 
 
-def make_line(node, key_location):
+def make_line(node: dict, key_location: str) -> str:
     change = node['change']
     result = f"Property '{key_location}' was {change}"  # covers the 'removed'
     if change == 'added':
@@ -26,8 +26,8 @@ def make_line(node, key_location):
     return result
 
 
-def render(comparison, location=''):
-    def locate(k):
+def render(comparison: dict, location: str = '') -> list:
+    def locate(k: str) -> str:
         if location == '':
             return k
         return location + '.' + k
