@@ -1,7 +1,9 @@
+from typing import Any
+
 from gendiff.utilities import missing
 
 
-def build_node(change, value, is_diff=False):
+def build_node(change: str, value: Any, is_diff: bool = False) -> dict:
     if isinstance(value, dict):
         if is_diff:
             return {
@@ -36,7 +38,7 @@ def build_node(change, value, is_diff=False):
     }
 
 
-def compare(first, second):
+def compare(first: dict, second: dict) -> dict:
     comparison = {}
     for key in first.keys() | second.keys():
         old = first.get(key, missing)

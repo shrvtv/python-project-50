@@ -6,7 +6,7 @@ import yaml
 missing = object()
 
 
-def parse(filename: str) ->dict:
+def parse(filename: str) -> dict:
     current_location = os.getcwd()
     path = os.path.join(current_location, filename)
     file = open(path)
